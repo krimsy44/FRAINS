@@ -1,0 +1,3 @@
+<x-layouts.admin title="Commandes — FRAINS Agro"><section class="commerce"><a href="{{ route('admin.dashboard') }}">← Tableau de bord</a><h1>Commandes clients</h1>
+@forelse($orders as $order)<article class="panel"><a href="{{ route('admin.orders.show', $order) }}">{{ $order->order_number }}</a><p>{{ $order->customer?->name }} · {{ \App\Models\Order::STATUSES[$order->status] ?? $order->status }} · {{ number_format($order->total, 0, ',', ' ') }} FCFA · {{ $order->payment_status === 'PAID' ? 'Payé' : 'À encaisser' }}</p></article>
+@empty<p>Aucune commande reçue.</p>@endforelse{{ $orders->links() }}</section></x-layouts.admin>

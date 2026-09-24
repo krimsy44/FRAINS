@@ -1,0 +1,6 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Only the public directory is web-accessible when using XAMPP's parent DocumentRoot.
+    RewriteRule ^(?!public(?:/|$)).* - [F,L]
+</IfModule>
+

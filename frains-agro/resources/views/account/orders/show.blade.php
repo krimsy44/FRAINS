@@ -1,0 +1,1 @@
+<x-layouts.app title="Ma commande — FRAINS Agro"><section class="commerce"><a href="{{ route('account.orders.index') }}">← Mes commandes</a><h1>{{ $order->order_number }}</h1>@include('orders.details')</section></x-layouts.app>

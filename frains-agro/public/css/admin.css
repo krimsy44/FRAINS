@@ -1,0 +1,41 @@
+.admin-area{background:#f3f6f2}
+.admin-header{display:flex;align-items:center;gap:24px;padding:20px 28px;background:white;border-bottom:1px solid #dde5dc}
+.admin-header .brand{white-space:nowrap}
+.admin-label{color:#17633b;font-size:14px;border-left:1px solid #dde5dc;padding-left:24px}
+.admin-header nav{margin-left:auto;display:flex;align-items:center;flex-wrap:wrap;gap:18px;font-size:14px}
+.admin-header nav>a{color:#17633b;text-decoration:underline;text-underline-offset:4px}
+.admin-shell{display:grid;grid-template-columns:225px minmax(0,1fr);min-height:calc(100vh - 85px)}
+.admin-shell>.workspace-nav{float:none;width:auto;min-height:100%;border-radius:0;align-content:start}
+.admin-shell>.workspace-nav+main{margin-left:0;min-width:0}
+@media(max-width:800px){.admin-header{padding:18px;flex-wrap:wrap;gap:14px}.admin-label{padding-left:14px}.admin-header nav{margin-left:0;width:100%;gap:14px}.admin-shell{display:block}.admin-shell>.workspace-nav{min-height:0;width:100%;display:flex}.admin-header nav>span{width:100%}}
+
+/* Admin back link */
+.admin-back-link{margin:18px 28px 0;font-size:14px;font-weight:800}
+.admin-back-link a{color:#17633b;text-decoration:none}
+.admin-back-link a:hover,.admin-back-link a:focus-visible{text-decoration:underline;text-underline-offset:4px}
+@media(max-width:800px){.admin-back-link{margin:14px 16px 0}}
+/* Logo inspired admin header */
+.admin-header{background:#fff9eb;border-bottom:3px solid #c48728;box-shadow:0 10px 28px rgba(19,72,49,.08)}
+.admin-header .brand{color:#0f4a35}
+.admin-header .brand em{color:#b8791d}
+.admin-label{color:#0f4a35;border-left-color:rgba(196,135,40,.45);background:#f5ead3;border-radius:999px;padding:7px 12px;border-left-width:0;font-weight:800}
+.admin-header nav>a,.admin-header .logout button{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 12px;border:1px solid rgba(15,74,53,.14);border-radius:999px;background:rgba(255,255,255,.72);color:#0f4a35!important;font-weight:800;text-decoration:none!important;font:inherit;cursor:pointer}
+.admin-header nav>a:hover,.admin-header .logout button:hover{background:#0f4a35;color:#fff!important;border-color:#0f4a35}
+.workspace-nav{background:#0f4a35!important;border-right:4px solid #c48728}
+.workspace-nav a{color:#fff4dd;border-radius:8px}
+.workspace-nav a:hover,.workspace-nav a:focus-visible{background:#c48728!important;color:#fff!important}
+/* Fixed admin navbar */
+.admin-header{position:sticky!important;top:0!important;z-index:1100!important}
+/* Truly fixed admin navbar */
+.admin-area{padding-top:126px!important}
+.admin-header{position:fixed!important;top:0!important;left:0!important;right:0!important;width:100%!important;z-index:3100!important}
+@media(max-width:900px){.admin-area{padding-top:104px!important}}
+/* More visible admin logo */
+.admin-header .brand .brand-logo{width:150px!important;height:100px!important;padding:4px!important;background:#fff!important;border:2px solid #c48728!important;border-radius:8px!important;box-shadow:0 8px 18px rgba(15,74,53,.14)!important}
+.admin-header{min-height:152px!important}
+.admin-area{padding-top:152px!important}
+@media(max-width:900px){.admin-header .brand .brand-logo{width:118px!important;height:82px!important}.admin-header{min-height:126px!important}.admin-area{padding-top:126px!important}}
+.admin-area{padding-top:var(--admin-header-height,152px)!important}
+.admin-shell>.workspace-nav{position:fixed;top:var(--admin-header-height,152px);left:0;bottom:0;width:225px;min-height:0;overflow-y:auto;z-index:3000}
+.admin-shell>main{grid-column:2}
+@media(max-width:800px){.admin-shell{padding-top:var(--admin-nav-height,70px)}.admin-shell>.workspace-nav{bottom:auto;height:auto;max-height:calc(100dvh - var(--admin-header-height,152px));overflow-x:auto;overflow-y:hidden}}

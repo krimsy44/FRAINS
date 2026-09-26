@@ -1,8 +1,8 @@
 <x-layouts.app :title="$wholesaleOnly ? 'Vente en gros - FRAINS Agro' : 'Catalogue - FRAINS Agro'">
-    <section class="page-head catalog-head">
+    <section @class(['page-head catalog-head', 'wholesale-heading' => $wholesaleOnly])>
         <p class="catalog-back-link"><a href="{{ url()->previous() }}">&larr; Retour</a></p>
         <div class="catalog-title">
-            <p class="eyebrow">CATALOGUE</p>
+            <p class="eyebrow">{{ $wholesaleOnly ? 'FRAINS AGRO · VENTE EN GROS' : 'CATALOGUE' }}</p>
             <h1>{{ $wholesaleOnly ? 'Nos produits disponibles en gros' : 'Nos produits agricoles' }}</h1>
             @if($wholesaleOnly)<p>Découvrez nos produits disponibles en gros. Pour préparer votre achat, demandez un devis ou contactez directement notre administration.</p>@endif
         </div>
@@ -22,9 +22,13 @@
         </form>
     </section>
 
-    <section class="section compact">
-        <div class="grid products">
+    <section @class(['section compact', 'wholesale-catalogue' => $wholesaleOnly])>
+        @if($wholesaleOnly)<div class="wholesale-results"><h2>Notre sélection en gros</h2><span>{{ $products->total() }} produit(s)</span></div>@endif
+        <div @class(['grid products', 'wholesale-grid' => $wholesaleOnly])>
             @forelse($products as $product)
+                @if($wholesaleOnly)
+                    <x-wholesale-product :product="$product" />
+                @else
                 <article class="card">
                     <div class="product-image">
                         @if($product->image)
@@ -37,13 +41,9 @@
                     <h3>{{ $product->name }}</h3>
                     <strong>{{ number_format($product->base_price, 0, ',', ' ') }} FCFA <small>/ {{ strtolower($product->unit) }}</small></strong>
                     <x-product-availability :product="$product" />
-                    @unless($wholesaleOnly)<a href="{{ route('products.show', $product) }}">Details</a>@endunless
-                    @if($wholesaleOnly)
-                        <p>Minimum : {{ (float) $product->minimum_order_quantity }} {{ strtolower($product->unit) }}@if($product->packaging) · {{ $product->packaging }}@endif</p>
-                        <a class="button" href="{{ route('quotes.start', ['product' => $product->id]) }}">Demander un devis</a>
-                        <a href="{{ route('public.page', 'contact') }}">Contacter l’administration</a>
-                    @endif
+                    <a href="{{ route('products.show', $product) }}">Details</a>
                 </article>
+                @endif
             @empty
                 <p>Aucun produit ne correspond a votre recherche.</p>
             @endforelse

@@ -124,7 +124,7 @@ class CheckoutController extends Controller
                 $line['stock']->increment('reserved_quantity', $line['quantity']);
                 StockMovement::create(['product_id' => $line['product']->id, 'user_id' => $request->user()?->id, 'type' => 'RESERVATION', 'quantity' => $line['quantity'], 'reason' => "Réservation {$order->order_number}"]);
             }
-            Delivery::create(['order_id' => $order->id, 'delivery_zone_id' => $zone->id, 'delivery_number' => 'LIV-'.now()->format('Y').'-'.$sequence, 'delivery_address' => $data['delivery_address'], 'customer_phone' => $customer->contact_phone]);
+            Delivery::create(['order_id' => $order->id, 'delivery_zone_id' => $zone->id, 'delivery_number' => DocumentNumber::next('LIV'), 'delivery_address' => $data['delivery_address'], 'customer_phone' => $customer->contact_phone]);
             Payment::create(['order_id' => $order->id, 'customer_id' => $customer->id, 'reference' => 'PAY-'.now()->format('Ymd').'-'.$sequence, 'amount' => $order->total, 'method' => $data['payment_method']]);
             $order->delivery->update(['scheduled_date' => $publicCheckout ? null : $request->input('scheduled_date')]);
             $order->statusUpdates()->create(['status' => 'NEW', 'message' => 'Votre commande a été reçue. Nous vous contacterons pour confirmer la livraison.', 'user_id' => $request->user()?->id]);

@@ -41,12 +41,16 @@
         </form>
     @else
         @if($section==='tableau-de-bord')
+            <h2>Mon tableau de bord</h2>
             <section class="account-summary">
-                <article><span>Client</span><strong>{{ auth()->user()->name }}</strong></article>
-                <article><span>Entreprise</span><strong>{{ $company }}</strong></article>
-                <article><span>Telephone</span><strong>{{ auth()->user()->phone }}</strong></article>
+                <article><span>Mes commandes</span><strong>{{ $dashboard['orders'] }}</strong></article>
+                <article><span>Commandes en cours</span><strong>{{ $dashboard['ongoing'] }}</strong></article>
+                <article><span>Commandes livrées</span><strong>{{ $dashboard['delivered'] }}</strong></article>
+                <article><span>Devis en attente</span><strong>{{ $dashboard['quotes'] }}</strong></article>
             </section>
             <p>Retrouvez vos commandes, devis, factures, paiements et livraisons dans cet espace.</p><p><a class="button" href="{{ route('account.orders.index') }}">Suivre mes commandes</a></p>
+            <p><a class="button" href="{{ route('public.page', 'vente-en-gros') }}">Commander en gros</a> <a class="button" href="{{ route('quotes.index') }}">Consulter mes devis</a></p>
+            <h2>Mes dernières commandes</h2>
         @endif
 
         @forelse($orders as $order)

@@ -28,6 +28,7 @@ class GuestCheckoutTest extends TestCase
         $data = $this->prepareCart();
         $this->post(route('guest.checkout'), $data)->assertSessionHasNoErrors();
         $order = Order::firstOrFail();
+        $this->assertMatchesRegularExpression('/^LIV-'.now()->format('Y').'-[0-9]{6}$/', $order->delivery->delivery_number);
         $customerId = $order->customer_id;
         $this->actingAs(User::where('email', 'admin@frains-agro.sn')->firstOrFail(), 'admin');
         $account = [

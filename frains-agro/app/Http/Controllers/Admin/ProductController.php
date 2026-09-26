@@ -20,7 +20,7 @@ class ProductController extends Controller
 
     public function create()
     {
-        return view('admin.products.form', ['product' => new Product, 'categories' => $this->categories()]);
+        return view('admin.products.form', ['product' => new Product(['wholesale_available' => request()->boolean('wholesale')]), 'categories' => $this->categories()]);
     }
 
     public function store(Request $request)

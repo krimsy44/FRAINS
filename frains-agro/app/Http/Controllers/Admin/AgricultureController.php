@@ -53,7 +53,7 @@ class AgricultureController extends Controller
             $culture = $this->cultures()->whereKey($harvest->cultivation_id)->lockForUpdate()->firstOrFail();
             $harvest = Harvest::whereKey($harvest->id)->lockForUpdate()->firstOrFail();
             if (strtotime($data['harvested_at']) < strtotime($culture->planted_at)) {
-                throw ValidationException::withMessages(['harvested_at' => 'La récolte ne peut pas précéder la plantation.']);
+                throw ValidationException::withMessages(['harvested_at' => 'La date de récolte doit être égale ou postérieure au '.\Illuminate\Support\Carbon::parse($culture->planted_at)->format('d/m/Y').' (date de plantation). Si la plantation est incorrecte, corrigez-la dans Gérer les cultures.']);
             }
             $before = $harvest->only(['harvested_at', 'quantity', 'loss_quantity', 'notes']);
             $usable = round($data['quantity'] - $data['loss_quantity'], 2);
@@ -94,8 +94,11 @@ class AgricultureController extends Controller
             if (! empty($data['submission_token']) && Harvest::where('submission_token', $data['submission_token'])->where('cultivation_id', $culture->id)->exists()) {
                 return;
             }
-            if ($culture->status === 'CLOSED' || $data['harvested_at'] < $culture->planted_at) {
-                throw ValidationException::withMessages(['harvested_at' => 'Culture terminée ou récolte antérieure à la plantation.']);
+            if ($culture->status === 'CLOSED') {
+                throw ValidationException::withMessages(['cultivation_id' => 'Cette culture est terminée. Choisissez une culture en cours.']);
+            }
+            if (strtotime($data['harvested_at']) < strtotime($culture->planted_at)) {
+                throw ValidationException::withMessages(['harvested_at' => 'La date de récolte doit être égale ou postérieure au '.\Illuminate\Support\Carbon::parse($culture->planted_at)->format('d/m/Y').' (date de plantation). Si la plantation est incorrecte, corrigez-la dans Gérer les cultures.']);
             }
             $harvest = Harvest::create($data + ['user_id' => auth()->id()]);
             $product = Product::whereKey($culture->product_id)->lockForUpdate()->firstOrFail();

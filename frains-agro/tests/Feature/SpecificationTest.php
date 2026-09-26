@@ -32,6 +32,17 @@ class SpecificationTest extends TestCase
 
     private DeliveryZone $zone;
 
+    public function test_customer_dashboard_counts_only_the_current_customers_orders(): void
+    {
+        $order = $this->order();
+        $this->get(route('account.section'))->assertOk()->assertSee('Mon tableau de bord')
+            ->assertViewHas('dashboard', fn ($metrics) => $metrics === ['orders' => 1, 'ongoing' => 1, 'delivered' => 0, 'quotes' => 0]);
+        $other = $this->user('CUSTOMER', 'dashboard-other');
+        Customer::create(['user_id' => $other->id, 'status' => 'active']);
+        $this->actingAs($other)->get(route('account.section'))->assertOk()->assertDontSee($order->order_number)
+            ->assertViewHas('dashboard', fn ($metrics) => $metrics === ['orders' => 0, 'ongoing' => 0, 'delivered' => 0, 'quotes' => 0]);
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -192,6 +203,11 @@ class SpecificationTest extends TestCase
         $this->actingAs($producerUser)->get(route('admin.agriculture.index'))->assertOk();
         $this->post(route('admin.harvests.store'), ['cultivation_id' => $culture->id, 'harvested_at' => today()->toDateString(), 'quantity' => 50, 'loss_quantity' => 5])->assertSessionHasNoErrors();
         $this->assertEquals($initial + 45, $this->product->stock->fresh()->quantity);
+        $harvest = Harvest::where('cultivation_id', $culture->id)->firstOrFail();
+        $this->assertDatabaseHas('harvests', ['id' => $harvest->id, 'quantity' => 50, 'loss_quantity' => 5]);
+        $this->assertDatabaseHas('stock_lots', ['harvest_id' => $harvest->id, 'quantity' => 45, 'remaining_quantity' => 45]);
+        $this->assertDatabaseHas('stock_movements', ['reason' => 'Récolte #'.$harvest->id, 'type' => 'HARVEST', 'quantity' => 45]);
+        $this->get(route('admin.agriculture.index'))->assertOk()->assertSee('45,00')->assertSee('data-harvest-net', false);
         $other = $this->user('PRODUCER', 'otherproducer');
         $this->actingAs($other)->get(route('admin.resources.edit', ['cultivations', $culture->id]))->assertNotFound();
         $this->post(route('admin.harvests.store'), ['cultivation_id' => $culture->id, 'harvested_at' => today()->toDateString(), 'quantity' => 50, 'loss_quantity' => 5])->assertNotFound();
@@ -239,6 +255,9 @@ class SpecificationTest extends TestCase
         $order = $this->order();
         $driverUser = $this->user('DRIVER', 'driver');
         $driver = Driver::create(['user_id' => $driverUser->id, 'name' => 'Livreur', 'phone' => '770000000', 'is_available' => true]);
+        $this->actingAs($this->admin)->get(route('admin.orders.show', $order))->assertOk()->assertSee('770000000')->assertSee('order-driver', false);
+        $this->patch(route('admin.orders.update', $order), ['status' => $order->status, 'driver_id' => $driver->id, 'driver_name' => 'Incorrect', 'driver_phone' => '000'])->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('deliveries', ['id' => $order->delivery->id, 'driver_id' => $driver->id, 'driver_name' => 'Livreur', 'driver_phone' => '770000000']);
         $this->actingAs($this->admin)->post(route('admin.deliveries.assign', $order->delivery), ['driver_id' => $driver->id, 'scheduled_date' => today()->addDay()->toDateString()])->assertSessionHasNoErrors();
         foreach (['CONFIRMED', 'PREPARING', 'READY'] as $status) {
             $this->patch(route('admin.orders.update', $order), ['status' => $status])->assertSessionHasNoErrors();

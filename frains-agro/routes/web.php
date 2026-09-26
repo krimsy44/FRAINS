@@ -77,6 +77,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:admin', 'role:ADMIN,MA
     Route::delete('/catalogue/{product}/tarifs/{price}', [CatalogueController::class, 'disable'])->middleware('role:ADMIN,MANAGER,COMMERCIAL')->name('catalogue.disable');
     Route::resource('products', ProductController::class)->except('show')->middleware('role:ADMIN,MANAGER,COMMERCIAL');
     Route::resource('orders', App\Http\Controllers\Admin\OrderController::class)->only(['index', 'show', 'update'])->middleware('role:ADMIN,MANAGER,COMMERCIAL');
+    Route::delete('/orders/{order}', [App\Http\Controllers\Admin\OrderController::class, 'destroy'])->middleware('role:ADMIN')->name('orders.destroy');
     Route::get('/gestion/{resource}', [ResourceController::class, 'index'])->name('resources.index');
     Route::get('/gestion/{resource}/nouveau', [ResourceController::class, 'create'])->name('resources.create');
     Route::post('/gestion/{resource}', [ResourceController::class, 'store'])->name('resources.store');

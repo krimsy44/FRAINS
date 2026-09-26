@@ -27,10 +27,11 @@ class StorefrontController extends Controller
         ]);
     }
 
-    public function products()
+    public function products(bool $wholesaleOnly = false)
     {
         request()->validate(['q' => 'nullable|string|max:120', 'zone' => 'nullable|string|max:120', 'category' => 'nullable|string|max:120', 'min_price' => 'nullable|numeric|min:0', 'max_price' => 'nullable|numeric|min:0', 'availability' => 'nullable|in:available,out', 'wholesale' => 'nullable|boolean']);
         $searchTerm = trim((string) request('q'));
+        $wholesaleOnly = $wholesaleOnly || request()->boolean('wholesale');
 
         $products = Product::query()->with(['category', 'stock'])->where('is_active', true)
             ->when($searchTerm !== '', fn ($query) => $query->where(fn ($q) => $q
@@ -42,12 +43,12 @@ class StorefrontController extends Controller
             ->when($searchTerm === '' && request('zone'), fn ($q, $v) => $q->where('production_zone', 'like', '%'.$v.'%'))
             ->when($searchTerm === '' && request()->filled('min_price'), fn ($q) => $q->where('base_price', '>=', request('min_price')))
             ->when($searchTerm === '' && request()->filled('max_price'), fn ($q) => $q->where('base_price', '<=', request('max_price')))
-            ->when($searchTerm === '' && request()->boolean('wholesale'), fn ($q) => $q->where('wholesale_available', true))
+            ->when($wholesaleOnly, fn ($q) => $q->where('wholesale_available', true))
             ->when($searchTerm === '' && request('availability') === 'available', fn ($q) => $q->whereHas('stock', fn ($s) => $s->whereRaw('quantity > reserved_quantity')))
             ->when($searchTerm === '' && request('availability') === 'out', fn ($q) => $q->where(fn ($q) => $q->whereDoesntHave('stock')->orWhereHas('stock', fn ($s) => $s->whereRaw('quantity <= reserved_quantity'))))
             ->orderBy('name')->paginate(12)->withQueryString();
 
-        return view('storefront.products', ['products' => $products, 'categories' => Category::where('is_active', true)->orderBy('name')->get()]);
+        return view('storefront.products', ['products' => $products, 'wholesaleOnly' => $wholesaleOnly, 'categories' => Category::where('is_active', true)->orderBy('name')->get()]);
     }
 
     public function show(Product $product)

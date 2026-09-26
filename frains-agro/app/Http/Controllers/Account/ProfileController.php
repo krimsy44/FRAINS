@@ -15,8 +15,14 @@ class ProfileController extends Controller
     {
         abort_unless(in_array($section, ['tableau-de-bord', 'profil', 'adresses', 'paiements', 'factures', 'livraisons']), 404);
         $customer = auth()->user()->customer;
+        $dashboard = [
+            'orders' => $customer->orders()->count(),
+            'ongoing' => $customer->orders()->whereIn('status', ['NEW', 'CONFIRMED', 'PREPARING', 'READY', 'SHIPPING', 'PARTIALLY_DELIVERED'])->count(),
+            'delivered' => $customer->orders()->whereIn('status', ['DELIVERED', 'COMPLETED'])->count(),
+            'quotes' => \App\Models\Quote::where('customer_id', $customer->id)->whereIn('status', ['REQUESTED', 'REVIEWING', 'OFFERED'])->count(),
+        ];
 
-        return view('account.overview', ['section' => $section, 'customer' => $customer, 'orders' => $customer->orders()->with(['receipts', 'delivery'])->latest()->paginate(20), 'addresses' => Address::where('customer_id', $customer->id)->get(), 'zones' => DeliveryZone::where('is_active', true)->get()]);
+        return view('account.overview', ['section' => $section, 'dashboard' => $dashboard, 'customer' => $customer, 'orders' => $customer->orders()->with(['receipts', 'delivery'])->latest()->paginate(20), 'addresses' => Address::where('customer_id', $customer->id)->get(), 'zones' => DeliveryZone::where('is_active', true)->get()]);
     }
 
     public function update(Request $request)

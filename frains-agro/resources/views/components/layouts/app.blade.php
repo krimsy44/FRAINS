@@ -20,6 +20,7 @@
             <a href="{{ route('products.index') }}">Produits</a>
             <a href="{{ route('cart.index') }}">Panier <b>{{ count(session('cart', [])) }}</b></a>
             <a href="{{ route('account.section') }}">Espace client</a>
+            <a href="{{ route('public.page', 'vente-en-gros') }}">Vente en gros</a>
             <a href="{{ route('account.orders.index') }}">Suivi commandes</a>
             <a href="{{ route('quotes.index') }}">Mes devis</a>
             <a href="{{ route('notifications.index') }}">Notifications</a>

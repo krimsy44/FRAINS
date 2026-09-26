@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\Driver;
 use App\Models\Order;
 use App\Models\OrderStatusUpdate;
 use App\Models\Stock;
@@ -20,12 +21,30 @@ class OrderController extends Controller
 {
     public function index()
     {
-        return view('admin.orders.index', ['orders' => Order::with('customer.user')->latest()->paginate(20)]);
+        return view('admin.orders.index', ['orders' => Order::whereNull('admin_deleted_at')->with('customer.user')->latest()->paginate(20)]);
+    }
+
+    public function destroy(Order $order)
+    {
+        DB::transaction(function () use ($order) {
+            $order = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
+            if ($order->admin_deleted_at) {
+                return;
+            }
+            if (! in_array($order->status, ['CANCELLED', 'REFUSED', 'COMPLETED'], true)) {
+                throw ValidationException::withMessages(['order' => 'Annulez ou terminez la commande avant de la supprimer.']);
+            }
+            $order->admin_deleted_at = now();
+            $order->save();
+            AuditLog::record('order.removed_from_admin_list', 'order:'.$order->id, ['order_number' => $order->order_number, 'status' => $order->status]);
+        });
+
+        return to_route('admin.orders.index')->with('success', 'Commande supprimée de la liste. Son historique et ses documents sont conservés.');
     }
 
     public function show(Order $order)
     {
-        return view('admin.orders.show', ['order' => $order->load(['items', 'customer.user', 'delivery.zone', 'payment', 'statusUpdates.user'])]);
+        return view('admin.orders.show', ['order' => $order->load(['items', 'customer.user', 'delivery.zone', 'payment', 'statusUpdates.user']), 'drivers' => Driver::orderBy('name')->get()]);
     }
 
     public function update(Request $request, Order $order)
@@ -33,6 +52,7 @@ class OrderController extends Controller
         $data = $request->validate([
             'status' => ['required', Rule::in(array_keys(Order::STATUSES))],
             'mark_paid' => ['nullable', 'boolean'],
+            'driver_id' => ['nullable', 'integer', 'exists:drivers,id'],
             'driver_name' => ['nullable', 'string', 'max:120'],
             'driver_phone' => ['nullable', 'string', 'max:30'],
             'scheduled_date' => ['nullable', 'date'],
@@ -49,6 +69,14 @@ class OrderController extends Controller
                 $fail('Cette commande est clôturée.');
             }
             $delivery = $order->delivery;
+            if (! empty($data['driver_id'])) {
+                $driver = Driver::whereKey($data['driver_id'])->lockForUpdate()->firstOrFail();
+                if (! $driver->is_available && (int) $delivery->driver_id !== $driver->id) {
+                    throw ValidationException::withMessages(['driver_id' => 'Ce livreur est indisponible. Choisissez un autre livreur.']);
+                }
+                $data['driver_name'] = $driver->name;
+                $data['driver_phone'] = $driver->phone;
+            }
             if ($data['status'] === 'SHIPPING' && (! ($data['driver_name'] ?? $delivery->driver_name) || ! ($data['driver_phone'] ?? $delivery->driver_phone))) {
                 $fail('Indiquez le nom et le téléphone du livreur avant l’expédition.');
             }
@@ -87,7 +115,10 @@ class OrderController extends Controller
                 'SHIPPING' => 'SHIPPING', 'PARTIALLY_DELIVERED' => 'PARTIALLY_DELIVERED', 'DELIVERED', 'COMPLETED' => 'DELIVERED', 'CANCELLED', 'REFUSED' => 'CANCELLED', default => 'PENDING'
             };
             $delivery->fill(collect($data)->only(['driver_name', 'driver_phone', 'scheduled_date'])->all());
-            if ($delivery->isDirty('driver_name')) {
+            if (! empty($data['driver_id'])) {
+                $delivery->driver_id = $data['driver_id'];
+            }
+            if ($delivery->isDirty(['driver_name', 'driver_id'])) {
                 $delivery->assigned_at = now();
             }
             $delivery->status = $deliveryStatus;

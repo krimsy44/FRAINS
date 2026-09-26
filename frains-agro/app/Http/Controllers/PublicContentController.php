@@ -12,6 +12,9 @@ class PublicContentController extends Controller
 {
     public function page(string $page)
     {
+        if ($page === 'vente-en-gros') {
+            return app(StorefrontController::class)->products(true);
+        }
         abort_unless(in_array($page, ['a-propos', 'activites', 'vente-en-gros', 'actualites', 'galerie', 'contact']), 404);
 
         return view('public.page', ['page' => $page, 'settings' => Setting::values(), 'publications' => Publication::published()->when($page === 'activites', fn ($q) => $q->where('category', 'ACTIVITY'))->latest('published_at')->paginate(9), 'images' => GalleryImage::where('is_active', true)->latest()->paginate(12)]);

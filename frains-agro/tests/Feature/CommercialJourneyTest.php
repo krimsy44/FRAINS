@@ -19,6 +19,36 @@ class CommercialJourneyTest extends TestCase
 
     private User $client;
 
+    public function test_admin_can_remove_closed_orders_without_losing_documents_or_changing_stock(): void
+    {
+        $order = $this->placeOrder();
+        $this->delete(route('admin.orders.destroy', $order))->assertRedirect(route('admin.login'));
+        $this->actingAs($this->admin);
+        $this->delete(route('admin.orders.destroy', $order))->assertSessionHasErrors('order');
+        $this->assertNull($order->fresh()->admin_deleted_at);
+        $this->patch(route('admin.orders.update', $order), ['status' => 'CANCELLED'])->assertSessionHasNoErrors();
+        $reserved = $this->product->stock->fresh()->reserved_quantity;
+        $this->delete(route('admin.orders.destroy', $order))->assertRedirect(route('admin.orders.index'));
+        $this->delete(route('admin.orders.destroy', $order))->assertRedirect(route('admin.orders.index'));
+        $this->assertNotNull($order->fresh()->admin_deleted_at);
+        $this->assertEquals($reserved, $this->product->stock->fresh()->reserved_quantity);
+        $this->assertNotNull($order->fresh()->invoice);
+        $this->assertNotNull($order->fresh()->payment);
+        $this->get(route('admin.orders.index'))->assertOk()->assertDontSee($order->order_number);
+        $this->get(route('admin.orders.show', $order))->assertOk();
+        $this->get(route('account.orders.show', $order))->assertOk();
+        $this->assertSame(1, \App\Models\AuditLog::where('action', 'order.removed_from_admin_list')->where('subject', 'order:'.$order->id)->count());
+    }
+
+    public function test_management_user_cannot_remove_orders(): void
+    {
+        $order = $this->placeOrder();
+        $role = Role::create(['name' => 'MANAGER', 'label' => 'Gestionnaire']);
+        $manager = User::create(['role_id' => $role->id, 'first_name' => 'Gestionnaire', 'last_name' => 'Test', 'email' => 'delete-manager@example.test', 'password' => 'password123', 'status' => 'active']);
+        $this->actingAs($manager)->delete(route('admin.orders.destroy', $order))->assertForbidden();
+        $this->assertNull($order->fresh()->admin_deleted_at);
+    }
+
     public function test_client_cancellation_releases_stock_once_and_preserves_history(): void
     {
         $order = $this->placeOrder();

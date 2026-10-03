@@ -2,7 +2,11 @@
 @foreach(['objectives' => 'Notre objectif', 'history' => 'Notre historique'] as $key => $heading)
 <article class="panel gie-story">
     <div><h2>{{ $heading }}</h2>
-        <p class="gie-text">{{ $settings[$key] ?? ($key === 'objectives' ? 'Développer les activités de production maraîchère et de commercialisation de produits agricoles du GIE au Sénégal.' : '') }}</p>
+        @if($key === 'history')
+            <div class="gie-history">{!! \Illuminate\Support\Str::markdown($settings[$key] ?? '', ['html_input' => 'strip', 'allow_unsafe_links' => false]) !!}</div>
+        @else
+            <p class="gie-text">{{ $settings[$key] ?? 'Développer les activités de production maraîchère et de commercialisation de produits agricoles du GIE au Sénégal.' }}</p>
+        @endif
         @if($key === 'history' && empty($settings[$key]))<p>L’historique officiel du GIE sera publié prochainement : sa création, ses fondateurs et les étapes de son développement.</p>@endif
     </div>
     @if(!empty($settings[$key.'_image_path']))

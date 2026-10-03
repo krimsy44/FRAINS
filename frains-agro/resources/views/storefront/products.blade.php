@@ -4,7 +4,7 @@
         <div class="catalog-title">
             <p class="eyebrow">{{ $wholesaleOnly ? 'FRAINS AGRO · VENTE EN GROS' : 'CATALOGUE' }}</p>
             <h1>{{ $wholesaleOnly ? 'Nos produits disponibles en gros' : 'Nos produits agricoles' }}</h1>
-            @if($wholesaleOnly)<p>Découvrez nos produits disponibles en gros. Pour préparer votre achat, demandez un devis ou contactez directement notre administration.</p>@endif
+            @if($wholesaleOnly)<p>Découvrez nos produits disponibles en gros. Cliquez sur « Demander un devis » pour échanger directement avec le GIE sur WhatsApp.</p>@endif
         </div>
 
         <form class="filters product-search-card" method="GET">
@@ -22,26 +22,28 @@
         </form>
     </section>
 
-    <section @class(['section compact', 'wholesale-catalogue' => $wholesaleOnly])>
+    <section @class(['section compact', 'wholesale-catalogue' => $wholesaleOnly, 'retail-catalogue' => !$wholesaleOnly])>
         @if($wholesaleOnly)<div class="wholesale-results"><h2>Notre sélection en gros</h2><span>{{ $products->total() }} produit(s)</span></div>@endif
         <div @class(['grid products', 'wholesale-grid' => $wholesaleOnly])>
             @forelse($products as $product)
                 @if($wholesaleOnly)
-                    <x-wholesale-product :product="$product" />
+                    <x-wholesale-product :product="$product" :whatsapp-phone="$whatsappPhone" />
                 @else
                 <article class="card">
-                    <div class="product-image">
+                    <a class="product-image catalog-product-photo" href="{{ route('products.show', $product) }}" aria-label="Voir {{ $product->name }}">
                         @if($product->image)
-                            <img src="{{ asset('storage/'.$product->image) }}" alt="{{ $product->name }}" style="width:100%;height:130px;object-fit:cover">
+                            <img src="{{ asset('storage/'.$product->image) }}" alt="{{ $product->name }}" data-product-sku="{{ $product->sku }}" width="600" height="450" loading="lazy">
                         @else
                             {{ strtoupper(mb_substr($product->name, 0, 1)) }}
                         @endif
-                    </div>
+                    </a>
+                    <div class="catalog-product-info">
                     <p>{{ $product->category?->name ?? 'Produit agricole' }}</p>
                     <h3>{{ $product->name }}</h3>
                     <strong>{{ number_format($product->base_price, 0, ',', ' ') }} FCFA <small>/ {{ strtolower($product->unit) }}</small></strong>
                     <x-product-availability :product="$product" />
-                    <a href="{{ route('products.show', $product) }}">Details</a>
+                    <a href="{{ route('products.show', $product) }}">Voir le produit &rarr;</a>
+                    </div>
                 </article>
                 @endif
             @empty

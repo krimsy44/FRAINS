@@ -29,11 +29,25 @@ class SettingsController extends Controller
             $rules[$section.'_image_caption'] = 'nullable|string|max:255';
         }
         $data = $request->validate($rules);
-        $request->validate(['logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096', 'objectives_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096', 'history_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096']);
+        $request->validate([
+            'logo' => 'nullable|prohibited_if:remove_logo,1|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'objectives_image' => 'nullable|prohibited_if:remove_objectives_image,1|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'history_image' => 'nullable|prohibited_if:remove_history_image,1|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'remove_logo' => 'sometimes|boolean',
+            'remove_objectives_image' => 'sometimes|boolean',
+            'remove_history_image' => 'sometimes|boolean',
+        ]);
         foreach (['objectives', 'history'] as $section) {
+            if ($request->boolean('remove_'.$section.'_image')) {
+                $data[$section.'_image_path'] = null;
+                $data[$section.'_image_caption'] = null;
+            }
             if ($request->hasFile($section.'_image')) {
                 $data[$section.'_image_path'] = $request->file($section.'_image')->store('media/gie', 'public');
             }
+        }
+        if ($request->boolean('remove_logo')) {
+            $data['logo_path'] = null;
         }
         if ($request->hasFile('logo')) {
             $data['logo_path'] = $request->file('logo')->store('media', 'public');
@@ -47,11 +61,22 @@ class SettingsController extends Controller
         return back()->with('success', 'Paramètres enregistrés.');
     }
 
-    public function users()
+    public function users(Request $request)
     {
+        $request->validate(['q' => 'nullable|string|max:255']);
+        $search = trim((string) $request->input('q', ''));
+        $users = User::whereHas('role', fn ($query) => $query->where('name', '!=', 'CUSTOMER'));
+        foreach (preg_split('/\s+/u', $search, -1, PREG_SPLIT_NO_EMPTY) as $term) {
+            $users->where(function ($query) use ($term) {
+                foreach (['first_name', 'last_name', 'email', 'phone'] as $field) {
+                    $query->orWhere($field, 'like', '%'.$term.'%');
+                }
+            });
+        }
+
         return view('admin.users', [
-            'users' => User::whereHas('role', fn ($query) => $query->where('name', '!=', 'CUSTOMER'))
-                ->with('role')->paginate(20),
+            'users' => $users->with('role')->orderBy('last_name')->orderBy('first_name')->orderBy('id')->paginate(20)->withQueryString(),
+            'search' => $search,
             'roles' => Role::where('name', '!=', 'CUSTOMER')->get(),
         ]);
     }

@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{{ asset('css/commerce.css') }}?v={{ filemtime(public_path('css/commerce.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/gie.css') }}?v={{ filemtime(public_path('css/gie.css')) }}">
 </head>
-<body>
+<body class="public-site">
 @php($role = auth()->user()?->role?->name)
 <header class="site-header">
     <a class="brand" href="{{ route('home') }}">@if($logo=\App\Models\Setting::where('key','logo_path')->value('value'))<img src="{{ asset('storage/'.$logo) }}" alt="Logo FRAINS" class="brand-logo" width="118" height="78">@else<span>F</span>@endif FRAINS <em>Agro</em></a>
@@ -47,6 +47,9 @@
 <script>
 (() => {
     const header = document.querySelector('.site-header');
+    const syncHeaderHeight = () => document.body.style.setProperty('--site-header-height', `${header.getBoundingClientRect().height}px`);
+    new ResizeObserver(syncHeaderHeight).observe(header);
+    syncHeaderHeight();
     const toggle = header.querySelector('.mobile-menu-toggle');
     const navigation = document.getElementById('main-navigation');
     const setOpen = (open) => {

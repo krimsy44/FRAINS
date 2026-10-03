@@ -32,7 +32,8 @@
                     <input type="hidden" name="{{ $name }}" value="0">
                     <input type="checkbox" name="{{ $name }}" value="1" @checked(old($name, $record->{$name} ?? true))>
                 @elseif($field[1] === 'file')
-                    <input type="file" name="{{ $name }}" @required($isRequired) accept="{{ $resource === 'gallery' ? 'image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm' : 'image/jpeg,image/png,image/webp' }}">
+                    <input type="file" name="{{ $name }}" @required($isRequired) accept="{{ $resource === 'gallery' ? 'image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm' : ($resource === 'publications' ? 'image/jpeg,image/png,image/webp,video/mp4,video/webm' : 'image/jpeg,image/png,image/webp') }}">
+                    @if($resource === 'publications')<small>Ajoutez une photo ou une vidéo MP4/WebM. Sans nouveau fichier, le média actuel est conservé. Privilégiez MP4 (H.264) pour la lecture sur mobile.</small>@endif
                     @if($record->{$name} ?? null)
                         @if(($record->media_type ?? 'image') === 'video')
                             <video src="{{ asset('storage/'.$record->{$name}) }}" controls width="220" style="display:block;margin-top:10px;max-width:100%;border-radius:8px"></video>

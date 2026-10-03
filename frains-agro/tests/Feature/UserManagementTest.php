@@ -22,6 +22,25 @@ class UserManagementTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_search_internal_users_by_name_email_and_phone(): void
+    {
+        $this->seed();
+        $admin = User::where('email', 'admin@frains-agro.sn')->firstOrFail();
+        $user = $this->account('PRODUCER');
+        $user->update(['first_name'=>'Awa', 'last_name'=>'Recherche', 'email'=>'awa.search@example.test', 'phone'=>'779876543']);
+        $customer = $this->account('CUSTOMER');
+        $customer->update(['first_name'=>'Awa', 'last_name'=>'Recherche']);
+        $this->actingAs($admin, 'admin');
+        foreach (['Awa Recherche', 'awa.search@', '779876543'] as $search) {
+            $response = $this->get(route('admin.users.index', ['q'=>$search]));
+            $response->assertOk()->assertSee($user->email)->assertDontSee($customer->email)
+                ->assertViewHas('users', fn ($users) => $users->total() === 1 && $users->first()->id === $user->id);
+        }
+        $this->get(route('admin.users.index', ['q'=>'introuvablexyz']))->assertOk()->assertSee('Aucun utilisateur');
+        $this->get(route('admin.users.index', ['q'=>'   ']))->assertOk()
+            ->assertViewHas('users', fn ($users) => $users->total() > 1);
+    }
+
     public function test_admin_can_edit_details_and_delete_an_internal_user_preserving_producer(): void
     {
         $this->seed();

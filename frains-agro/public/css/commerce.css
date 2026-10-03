@@ -368,7 +368,7 @@ footer { flex-wrap: wrap; gap: 20px; align-items: center; }
 .wholesale-product-photo img { width:100%; height:100%; object-fit:cover; }
 .wholesale-photo-placeholder { font-size:80px; color:#176b45; font-weight:800; }
 .wholesale-label { position:absolute; top:16px; left:16px; padding:8px 12px; border-radius:999px; background:#fff9eb; color:#113426; font-weight:700; font-size:12px; box-shadow:0 2px 10px #0001; }
-.wholesale-product-content { display:flex; flex:1; flex-direction:column; align-items:flex-start; padding:24px; gap:12px; }
+.wholesale-product-content { display:flex; flex:1; flex-direction:column; align-items:flex-start; padding:16px; gap:8px; }
 .wholesale-category { margin:0; font-size:11px; text-transform:uppercase; letter-spacing:1.2px; color:#637562; font-weight:700; }
 .wholesale-product h3 { margin:0; font-size:25px; line-height:1.2; overflow-wrap:anywhere; }
 .wholesale-price { width:100%; padding:16px 0; border-bottom:1px solid #e5ebe2; }
@@ -387,4 +387,36 @@ footer { flex-wrap: wrap; gap: 20px; align-items: center; }
 .wholesale-contact-button { color:#176b45; border:1px solid #dce5db; background:#fff; }
 .wholesale-contact-button:hover { background:#f2f6eb; }
 @media(max-width:1050px){.wholesale-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:600px){.wholesale-grid{grid-template-columns:minmax(0,1fr)}.wholesale-product-content{padding:20px}.wholesale-results h2{font-size:20px}.wholesale-results{align-items:flex-start}.wholesale-product-photo{aspect-ratio:16/11}}
+.wholesale-minimum { margin:0 0 6px; color:#637562; font-size:13px; line-height:1.5; }
+@media(max-width:600px){.wholesale-grid{grid-template-columns:minmax(0,1fr)}.wholesale-product-content{padding:16px}.wholesale-results h2{font-size:20px}.wholesale-results{align-items:flex-start}.wholesale-product-photo{aspect-ratio:16/11}}
+
+/* Compact public navbar with space matching its actual height. */
+body.public-site { padding-top:var(--site-header-height,64px)!important; }
+.public-site .site-header { min-height:64px!important; padding-top:6px!important; padding-bottom:6px!important; align-items:center; gap:12px; }
+.public-site .site-header .brand { font-size:18px; gap:6px; flex-shrink:0; }
+.public-site .site-header .brand .brand-logo { width:66px!important; height:44px!important; object-fit:contain; padding:0!important; border:0!important; border-radius:0!important; background:transparent!important; box-shadow:none!important; }
+.public-site .site-header nav { gap:6px!important; font-size:13px; }
+.public-site .site-header nav a,.public-site .site-header .logout button { padding:7px 9px; }
+@media(max-width:800px){
+  body.public-site { padding-top:var(--site-header-height,60px)!important; }
+  .public-site .site-header { min-height:60px!important; padding-top:6px!important; padding-bottom:6px!important; }
+  .public-site .site-header .brand .brand-logo { width:60px!important; height:40px!important; }
+}
+
+/* Larger, uncropped photos in the retail catalogue. */
+.retail-catalogue .grid.products { grid-template-columns:repeat(3,minmax(0,1fr)); gap:26px; }
+.retail-catalogue .card { padding:0; gap:0; min-width:0; overflow:hidden; border-radius:16px; box-shadow:0 8px 24px rgba(17,52,38,.06); }
+.retail-catalogue .card .catalog-product-photo { display:grid; place-items:center; width:100%; height:auto; aspect-ratio:4/3; margin:0; border-radius:0; background:#f0f3e9; overflow:hidden; }
+.retail-catalogue .catalog-product-photo img { display:block; width:100%; height:100%; object-fit:contain; }
+.retail-catalogue .catalog-product-info { display:flex; flex-direction:column; gap:12px; padding:20px; flex:1; }
+.retail-catalogue .catalog-product-info h3 { overflow-wrap:anywhere; }
+.retail-catalogue .catalog-product-info>a { margin-top:auto; padding-top:8px; }
+@media(max-width:1050px){.retail-catalogue .grid.products{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.retail-catalogue{padding-left:5vw;padding-right:5vw}.retail-catalogue .grid.products{grid-template-columns:minmax(0,1fr);gap:20px}}
+
+/* Fill the catalogue photo area for papaya and cucumber. */
+.retail-catalogue .catalog-product-photo img[data-product-sku="PAP-001"],
+.retail-catalogue .catalog-product-photo img[data-product-sku="CON-001"] {
+  object-fit: cover;
+  object-position: center;
+}

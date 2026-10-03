@@ -1,1 +1,5 @@
 .gie-intro{max-width:760px;font-size:18px;line-height:1.7;margin:24px 0 32px}.gie-story{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:28px}.gie-story h2{font-size:28px;margin-top:0}.gie-text{white-space:pre-line;line-height:1.8;overflow-wrap:anywhere}.gie-story figure{margin:0}.gie-story img{display:block;width:100%;max-height:360px;object-fit:contain;background:#edf2e8;border-radius:12px}.gie-story figcaption{font-size:14px;line-height:1.5;margin-top:12px;color:#45624e}.gie-photo-pending{padding:40px 24px;background:#edf2e8;border:1px dashed #9aaf99;border-radius:12px;text-align:center;line-height:1.6}.gie-gallery-photo{width:100%;height:220px;object-fit:cover}.gie-story>div{min-width:0}@media(max-width:700px){.gie-story{grid-template-columns:1fr;gap:18px}.gie-story h2{font-size:24px}}
+
+.gie-history { line-height: 1.8; }
+.gie-history p { margin: 0 0 1.2em; }
+.gie-history p:last-child { margin-bottom: 0; }

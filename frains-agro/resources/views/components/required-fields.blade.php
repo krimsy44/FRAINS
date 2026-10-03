@@ -1,6 +1,5 @@
 <style>
     .required-marker { color: #b42318; font-weight: 700; }
-    .required-fields-note { grid-column: 1 / -1; margin: 0 0 12px; font-size: 13px; }
 </style>
 <script>
 (() => {
@@ -35,15 +34,6 @@
                 (caption || label).append(marker);
             }
         });
-        const hasRequired = !!form.querySelector(':required:not(:disabled):not([type="hidden"])');
-        let note = form.querySelector('.required-fields-note');
-        if (hasRequired && !note) {
-            note = document.createElement('p');
-            note.className = 'required-fields-note';
-            note.textContent = 'Les champs marqués d’un astérisque (*) sont obligatoires.';
-            form.prepend(note);
-        }
-        if (note) note.hidden = !hasRequired;
     };
     document.querySelectorAll('form').forEach(form => {
         refresh(form);

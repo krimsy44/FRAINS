@@ -43,12 +43,16 @@ class StorefrontController extends Controller
             ->when($searchTerm === '' && request('zone'), fn ($q, $v) => $q->where('production_zone', 'like', '%'.$v.'%'))
             ->when($searchTerm === '' && request()->filled('min_price'), fn ($q) => $q->where('base_price', '>=', request('min_price')))
             ->when($searchTerm === '' && request()->filled('max_price'), fn ($q) => $q->where('base_price', '<=', request('max_price')))
-            ->when($wholesaleOnly, fn ($q) => $q->where('wholesale_available', true))
+            ->when($wholesaleOnly, fn ($q) => $q->where('wholesale_available', true)->whereHas('stock', fn ($stock) => $stock->whereRaw('quantity - reserved_quantity >= products.minimum_order_quantity')))
             ->when($searchTerm === '' && request('availability') === 'available', fn ($q) => $q->whereHas('stock', fn ($s) => $s->whereRaw('quantity > reserved_quantity')))
             ->when($searchTerm === '' && request('availability') === 'out', fn ($q) => $q->where(fn ($q) => $q->whereDoesntHave('stock')->orWhereHas('stock', fn ($s) => $s->whereRaw('quantity <= reserved_quantity'))))
             ->orderBy('name')->paginate(12)->withQueryString();
 
-        return view('storefront.products', ['products' => $products, 'wholesaleOnly' => $wholesaleOnly, 'categories' => Category::where('is_active', true)->orderBy('name')->get()]);
+        $whatsappPhone = preg_replace('/\D+/', '', Setting::where('key', 'phone')->value('value') ?: '779890101');
+        if (str_starts_with($whatsappPhone, '00221')) $whatsappPhone = substr($whatsappPhone, 2);
+        if (! str_starts_with($whatsappPhone, '221')) $whatsappPhone = '221'.$whatsappPhone;
+
+        return view('storefront.products', ['products' => $products, 'wholesaleOnly' => $wholesaleOnly, 'whatsappPhone' => $whatsappPhone, 'categories' => Category::where('is_active', true)->orderBy('name')->get()]);
     }
 
     public function show(Product $product)

@@ -1,4 +1,12 @@
-<x-layouts.admin title="Utilisateurs"><section class="commerce"><h1>Utilisateurs et permissions</h1><p>Modifiez les informations du compte souhaité, puis cliquez sur « Enregistrer les modifications ».</p>@foreach($users as $user)<h2>Modifier les informations de {{ $user->name }}</h2><form class="panel commerce-form" method="POST" action="{{ route('admin.users.update',$user) }}">@csrf @method('PUT')<input type="hidden" name="editing_user_id" value="{{ $user->id }}">
+<x-layouts.admin title="Utilisateurs"><section class="commerce"><h1>Utilisateurs et permissions</h1><p>Modifiez les informations du compte souhaité, puis cliquez sur « Enregistrer les modifications ».</p><form class="panel commerce-form" method="GET" action="{{ route('admin.users.index') }}" role="search">
+<h2>Rechercher un utilisateur</h2>
+<label for="user-search">Nom, prénom, e-mail ou téléphone</label>
+<input id="user-search" type="search" name="q" value="{{ $search }}" maxlength="255" placeholder="Ex. : Awa Diop, awa@exemple.sn ou 771234567">
+<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="button" type="submit">Rechercher</button>@if($search !== '')<a href="{{ route('admin.users.index') }}">Réinitialiser</a>@endif</div>
+</form>
+<p>{{ $users->total() }} utilisateur(s){{ $search !== '' ? ' trouvé(s)' : '' }}.</p>
+@if($users->isEmpty())<p>Aucun utilisateur trouvé. Modifiez votre recherche.</p>@endif
+@foreach($users as $user)<h2>Modifier les informations de {{ $user->name }}</h2><form class="panel commerce-form" method="POST" action="{{ route('admin.users.update',$user) }}">@csrf @method('PUT')<input type="hidden" name="editing_user_id" value="{{ $user->id }}">
 @foreach(['first_name'=>'Prénom','last_name'=>'Nom','email'=>'E-mail','phone'=>'Téléphone','address'=>'Adresse','city'=>'Ville'] as $field=>$label)
 <label>{{ $label }}<input name="{{ $field }}" type="{{ $field === 'email' ? 'email' : ($field === 'phone' ? 'tel' : 'text') }}" value="{{ (string) old('editing_user_id') === (string) $user->id ? old($field, $user->$field) : $user->$field }}" @required(in_array($field, ['first_name','last_name','email']))></label>
 @endforeach

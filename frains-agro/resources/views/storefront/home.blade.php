@@ -8,7 +8,7 @@
         </div>
     </section>
 
-    <section class="section">
+    <section class="section retail-catalogue">
         <div class="section-heading">
             <p class="eyebrow">NOS PRODUITS</p>
             <h2>La fraicheur au rythme des saisons.</h2>
@@ -17,18 +17,20 @@
         <div class="grid products">
             @forelse($featuredProducts as $product)
                 <article class="card">
-                    <div class="product-image">
+                    <a class="product-image catalog-product-photo" href="{{ route('products.show', $product) }}" aria-label="Voir {{ $product->name }}">
                         @if($product->image)
-                            <img src="{{ asset('storage/'.$product->image) }}" alt="{{ $product->name }}" style="width:100%;height:130px;object-fit:cover">
+                            <img src="{{ asset('storage/'.$product->image) }}" alt="{{ $product->name }}" data-product-sku="{{ $product->sku }}" width="600" height="450" loading="lazy">
                         @else
                             {{ strtoupper(mb_substr($product->name, 0, 1)) }}
                         @endif
-                    </div>
+                    </a>
+                    <div class="catalog-product-info">
                     <p>{{ $product->category?->name ?? 'Produit agricole' }}</p>
                     <h3>{{ $product->name }}</h3>
                     <strong>{{ number_format($product->base_price, 0, ',', ' ') }} FCFA <small>/ {{ strtolower($product->unit) }}</small></strong>
                     <x-product-availability :product="$product" />
                     <a href="{{ route('products.show', $product) }}">Voir le produit</a>
+                    </div>
                 </article>
             @empty
                 <p>Le catalogue arrive bientot.</p>

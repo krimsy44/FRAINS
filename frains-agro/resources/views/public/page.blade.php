@@ -1,4 +1,4 @@
-﻿<x-layouts.app :title="['a-propos'=>'A propos du GIE','activites'=>'Nos activites','vente-en-gros'=>'Vente en gros','actualites'=>'Actualites','galerie'=>'Galerie','contact'=>'Contact'][$page]"><section class="commerce">
+<x-layouts.app :title="['a-propos'=>'A propos du GIE','activites'=>'Nos activites','vente-en-gros'=>'Vente en gros','actualites'=>'Actualites','galerie'=>'Galerie','contact'=>'Contact'][$page]"><section class="commerce">
 @if($page==='vente-en-gros')
 <p class="catalog-back-link"><a href="{{ url()->previous() }}"><span aria-hidden="true">&larr;</span> Retour</a></p>
 @endif
@@ -11,7 +11,7 @@
     <a class="button" href="{{ route('products.index',['wholesale'=>1]) }}">Produits disponibles en gros</a>
     <a class="button" href="{{ route('quotes.start') }}">Demander un devis</a>
 </div>
-@elseif(in_array($page,['activites','actualites']))<div class="grid">@forelse($publications as $publication)<article class="card">@if($publication->image)<img src="{{ asset('storage/'.$publication->image) }}" alt="{{ $publication->title }}" style="width:100%;height:180px;object-fit:cover">@endif<h2>{{ $publication->title }}</h2><p>{{ $publication->published_at->format('d/m/Y') }}</p><p>{{ \Illuminate\Support\Str::limit($publication->content,180) }}</p><a href="{{ route('public.publication',$publication) }}">Lire</a></article>@empty<p>Aucune publication pour le moment.</p>@endforelse</div>{{ $publications->links() }}
+@elseif(in_array($page,['activites','actualites']))<div class="grid">@forelse($publications as $publication)<article class="card"><x-publication-media :publication="$publication" :compact="true" /><h2>{{ $publication->title }}</h2><p>{{ $publication->published_at->format('d/m/Y') }}</p><p>{{ \Illuminate\Support\Str::limit($publication->content,180) }}</p><a href="{{ route('public.publication',$publication) }}">Lire</a></article>@empty<p>Aucune publication pour le moment.</p>@endforelse</div>{{ $publications->links() }}
 @elseif($page==='galerie')
 <div class="gallery-card-grid">
     @forelse($images as $photo)

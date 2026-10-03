@@ -187,12 +187,12 @@ class ResourceController extends Controller
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $data['image'] = $file->store('media', 'public');
-            if ($resource === 'gallery') {
+            if (in_array($resource, ['gallery', 'publications'], true)) {
                 $data['media_type'] = str_starts_with((string) $file->getMimeType(), 'video/') ? 'video' : 'image';
             }
         } else {
             unset($data['image']);
-            if ($resource === 'gallery' && $record->exists) {
+            if (in_array($resource, ['gallery', 'publications'], true) && $record->exists) {
                 unset($data['media_type']);
             }
         }

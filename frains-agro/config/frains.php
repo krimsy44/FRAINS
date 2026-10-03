@@ -61,7 +61,7 @@ return [
             'title' => ['Titre', 'text', 'required|string|max:255'],
             'category' => ['Catégorie', 'select', 'required|in:NEWS,ACTIVITY,HARVEST,EVENT,ANNOUNCEMENT,INFORMATION,ADVICE', ['NEWS' => 'Actualité', 'ACTIVITY' => 'Activité agricole', 'HARVEST' => 'Récolte', 'EVENT' => 'Événement', 'ANNOUNCEMENT' => 'Annonce', 'INFORMATION' => 'Information du GIE', 'ADVICE' => 'Conseil agricole']],
             'content' => ['Contenu', 'textarea', 'required|string|max:30000'],
-            'image' => ['Image JPG, PNG ou WebP (4 Mo maximum)', 'file', 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096'],
+            'image' => ['Photo ou vidéo (JPG, PNG, WebP, MP4, WebM — 35 Mo maximum)', 'file', 'nullable|file|mimes:jpg,jpeg,png,webp,mp4,webm|max:35840'],
             'status' => ['Statut', 'select', 'required|in:DRAFT,PUBLISHED', ['DRAFT' => 'Brouillon', 'PUBLISHED' => 'Publié']],
             'published_at' => ['Date de publication', 'datetime-local', 'nullable|date'],
         ]],
